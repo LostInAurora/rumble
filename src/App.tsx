@@ -1,16 +1,23 @@
-import { useLiveQuery } from 'dexie-react-hooks'
-import { db } from './db'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Layout } from './components/Layout'
+
+function Placeholder({ name }: { name: string }) {
+  return <div className="text-[var(--text-muted)]">{name} — coming soon</div>
+}
 
 function App() {
-  const config = useLiveQuery(() => db.config.get('default'))
-
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-mono p-8">
-      <p className="text-[var(--accent-green)]">TV Portfolio Tracker</p>
-      <p className="text-[var(--text-muted)] mt-2">
-        DB Status: {config ? `Ready (base: ${config.baseCurrency})` : 'Loading...'}
-      </p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Placeholder name="Dashboard" />} />
+          <Route path="/holdings" element={<Placeholder name="Holdings" />} />
+          <Route path="/transactions" element={<Placeholder name="Transactions" />} />
+          <Route path="/analytics" element={<Placeholder name="Analytics" />} />
+          <Route path="/settings" element={<Placeholder name="Settings" />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 
