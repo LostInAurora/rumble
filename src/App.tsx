@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from './components/Layout'
+import { Dashboard } from './pages/Dashboard'
 
 function Placeholder({ name }: { name: string }) {
   return <div className="text-[var(--text-muted)]">{name} — coming soon</div>
@@ -10,7 +11,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<Placeholder name="Dashboard" />} />
+          <Route path="/" element={<Dashboard />} />
           <Route path="/holdings" element={<Placeholder name="Holdings" />} />
           <Route path="/transactions" element={<Placeholder name="Transactions" />} />
           <Route path="/analytics" element={<Placeholder name="Analytics" />} />
