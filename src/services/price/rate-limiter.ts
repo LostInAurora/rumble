@@ -1,11 +1,13 @@
 export class RateLimiter {
   private timestamps: number[] = []
   private queue: Array<{ resolve: () => void }> = []
+  private maxRequests: number
+  private perMs: number
 
-  constructor(
-    private maxRequests: number,
-    private perMs: number,
-  ) {}
+  constructor(maxRequests: number, perMs: number) {
+    this.maxRequests = maxRequests
+    this.perMs = perMs
+  }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     await this.waitForSlot()
