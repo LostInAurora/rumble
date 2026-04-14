@@ -5,6 +5,7 @@ import { useCashAccounts } from '../hooks/useCashAccounts'
 import { useExchangeRates } from '../hooks/useExchangeRates'
 import { useConfig } from '../hooks/useConfig'
 import { PriceStatus } from '../components/PriceStatus'
+import { CashAccountModal } from '../components/CashAccountModal'
 import type { Market, Currency } from '../types'
 import type { AggregatedHolding } from '../services/portfolio'
 
@@ -27,9 +28,10 @@ function formatCurrency(value: number, currency: string): string {
 export function Holdings() {
   const { config } = useConfig()
   const { holdingsByMarket } = useHoldings()
-  const { accounts } = useCashAccounts()
+  const { accounts, addAccount, deleteAccount } = useCashAccounts()
   const { convert } = useExchangeRates()
   const baseCurrency = config?.baseCurrency ?? 'USD'
+  const [cashModalOpen, setCashModalOpen] = useState(false)
 
   const symbolsByMarket: Record<Market, string[]> = useMemo(() => ({
     US: holdingsByMarket.US.map(h => h.symbol),
@@ -104,7 +106,15 @@ export function Holdings() {
           onClick={() => toggle('CASH')}
           className="flex items-center justify-between px-3 py-2 bg-[var(--bg-secondary)] rounded cursor-pointer hover:bg-[var(--bg-tertiary)] transition-colors"
         >
-          <span className="text-xs" style={{ color: MARKET_LABELS.CASH.color }}>{MARKET_LABELS.CASH.label}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs" style={{ color: MARKET_LABELS.CASH.color }}>{MARKET_LABELS.CASH.label}</span>
+            <button
+              onClick={(e) => { e.stopPropagation(); setCashModalOpen(true) }}
+              className="text-xs text-[var(--accent-green)] hover:underline"
+            >
+              + Add
+            </button>
+          </div>
           <span className="text-xs text-[var(--text-secondary)]">{formatCurrency(totalCash, baseCurrency)}</span>
         </div>
         {!collapsed['CASH'] && (
@@ -112,7 +122,15 @@ export function Holdings() {
             {accounts.map(acc => (
               <div key={acc.id} className="flex items-center justify-between py-1.5 border-b border-[var(--bg-primary)] text-sm">
                 <span className="text-[var(--text-primary)]">{acc.name}</span>
-                <span className="text-[var(--text-secondary)]">{formatCurrency(acc.balance, acc.currency)}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[var(--text-secondary)]">{formatCurrency(acc.balance, acc.currency)}</span>
+                  <button
+                    onClick={() => deleteAccount(acc.id)}
+                    className="text-[var(--text-muted)] hover:text-[var(--accent-red)] text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -134,6 +152,11 @@ export function Holdings() {
           No holdings yet. Press ⌘N to add a transaction.
         </div>
       )}
+      <CashAccountModal
+        open={cashModalOpen}
+        onClose={() => setCashModalOpen(false)}
+        onSave={addAccount}
+      />
     </div>
   )
 }
