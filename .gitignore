@@ -35,3 +35,10 @@ android/captures/
 android/.idea/
 *.iml
 local.properties
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
