@@ -5,7 +5,7 @@ interface Props {
 export function PriceStatus({ stale }: Props) {
   if (!stale) return null
   return (
-    <span className="text-[10px] text-[var(--accent-yellow)] ml-1" title="Price data is stale">
+    <span className="pulse-dot text-[10px] ml-1" style={{ color: 'var(--accent-yellow)' }} title="Price data is stale">
       ●
     </span>
   )

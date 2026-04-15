@@ -49,21 +49,28 @@ export function Analytics() {
   }, [transactions])
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg">
-        <div className="text-[9px] uppercase text-[var(--text-muted)] mb-3">Monthly Returns (%)</div>
+    <div className="max-w-4xl mx-auto space-y-5">
+      <div className="card-glass p-5 animate-fade-in">
+        <div className="label mb-4">Monthly Returns (%)</div>
         {monthlyReturns.length === 0 ? (
-          <div className="h-48 flex items-center justify-center text-[var(--text-muted)] text-sm text-center">
+          <div className="h-48 flex items-center justify-center text-sm text-center" style={{ color: 'var(--text-muted)' }}>
             Need at least 2 months of snapshots to show returns.<br />
             Snapshots are recorded daily when you open the app.
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={monthlyReturns}>
-              <XAxis dataKey="month" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
-              <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} width={40} tickFormatter={(v: number) => `${v.toFixed(0)}%`} />
+              <XAxis dataKey="month" tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }} axisLine={{ stroke: 'var(--border)' }} tickLine={false} />
+              <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} width={40} tickFormatter={(v: number) => `${v.toFixed(0)}%`} />
               <Tooltip
-                contentStyle={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '6px', fontFamily: 'monospace', fontSize: '12px' }}
+                contentStyle={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '12px',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '12px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                }}
                 formatter={(value) => {
                   if (typeof value === 'number') {
                     return [`${value.toFixed(2)}%`, 'Return']
@@ -71,7 +78,7 @@ export function Analytics() {
                   return [String(value), 'Return']
                 }}
               />
-              <Bar dataKey="returnPct" radius={[2, 2, 0, 0]}>
+              <Bar dataKey="returnPct" radius={[4, 4, 0, 0]}>
                 {monthlyReturns.map((entry, i) => (
                   <Cell key={i} fill={entry.returnPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'} />
                 ))}
@@ -81,18 +88,18 @@ export function Analytics() {
         )}
       </div>
 
-      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg">
-        <div className="text-[9px] uppercase text-[var(--text-muted)] mb-3">Transaction Activity</div>
+      <div className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <div className="label mb-4">Transaction Activity</div>
         {activityByMonth.length === 0 ? (
-          <div className="text-sm text-[var(--text-muted)]">No transactions yet.</div>
+          <div className="text-sm" style={{ color: 'var(--text-muted)' }}>No transactions yet.</div>
         ) : (
           <div className="space-y-1">
             {activityByMonth.map(({ month, buys, sells }) => (
-              <div key={month} className="flex items-center justify-between py-1 border-b border-[var(--bg-primary)]">
-                <span className="text-xs text-[var(--text-secondary)]">{month}</span>
-                <div className="flex gap-3 text-xs">
-                  <span className="text-[var(--accent-green)]">{buys} buys</span>
-                  <span className="text-[var(--accent-red)]">{sells} sells</span>
+              <div key={month} className="flex items-center justify-between py-2 px-2 rounded-lg transition-colors hover:bg-[var(--bg-tertiary)]" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <span className="font-data text-xs" style={{ color: 'var(--text-secondary)' }}>{month}</span>
+                <div className="flex gap-4 font-data text-xs">
+                  <span style={{ color: 'var(--accent-green)' }}>{buys} buys</span>
+                  <span style={{ color: 'var(--accent-red)' }}>{sells} sells</span>
                 </div>
               </div>
             ))}
@@ -100,23 +107,26 @@ export function Analytics() {
         )}
       </div>
 
-      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg">
-        <div className="text-[9px] uppercase text-[var(--text-muted)] mb-3">Transactions by Market</div>
+      <div className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.15s' }}>
+        <div className="label mb-4">Transactions by Market</div>
         {marketBreakdown.length === 0 ? (
-          <div className="text-sm text-[var(--text-muted)]">No transactions yet.</div>
+          <div className="text-sm" style={{ color: 'var(--text-muted)' }}>No transactions yet.</div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {marketBreakdown.map(({ market, count }) => {
               const total = marketBreakdown.reduce((s, m) => s + m.count, 0)
               const pct = total > 0 ? (count / total) * 100 : 0
               return (
                 <div key={market}>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-[var(--text-secondary)]">{market}</span>
-                    <span className="text-[var(--text-muted)]">{count} ({pct.toFixed(0)}%)</span>
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>{market}</span>
+                    <span className="font-data" style={{ color: 'var(--text-muted)' }}>{count} ({pct.toFixed(0)}%)</span>
                   </div>
-                  <div className="h-1.5 bg-[var(--bg-primary)] rounded overflow-hidden">
-                    <div className="h-full bg-[var(--accent-blue)] rounded" style={{ width: `${pct}%` }} />
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-purple))' }}
+                    />
                   </div>
                 </div>
               )

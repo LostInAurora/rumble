@@ -3,14 +3,10 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import { useConfig } from './useConfig'
 import { finnhubProvider } from '../services/price/finnhub'
-import { tushareProvider } from '../services/price/tushare'
-import { coingeckoProvider } from '../services/price/coingecko'
 import { RateLimiter } from '../services/price/rate-limiter'
 import type { Market } from '../types'
 
 const finnhubLimiter = new RateLimiter(60, 60_000)
-const tushareLimiter = new RateLimiter(200, 60_000)
-const coingeckoLimiter = new RateLimiter(10, 60_000)
 
 export function usePrices(symbolsByMarket: Record<Market, string[]>) {
   const { config } = useConfig()
@@ -30,41 +26,21 @@ export function usePrices(symbolsByMarket: Record<Market, string[]>) {
         return !cached || now - cached.updatedAt > staleMs
       })
 
-    // US + HK via Finnhub
-    const usHkSymbols = needsRefresh([
+    // US + HK + CRYPTO via Finnhub
+    const finnhubSymbols = needsRefresh([
       ...symbolsByMarket.US,
       ...symbolsByMarket.HK,
+      ...symbolsByMarket.CRYPTO,
     ])
-    if (usHkSymbols.length > 0 && config.apiKeys.finnhub) {
+    if (finnhubSymbols.length > 0 && config.apiKeys.finnhub) {
       finnhubLimiter.execute(async () => {
-        const results = await finnhubProvider.fetchPrices(usHkSymbols, config.apiKeys.finnhub)
+        const results = await finnhubProvider.fetchPrices(finnhubSymbols, config.apiKeys.finnhub)
         for (const r of results) {
           await db.priceCache.put({ symbol: r.symbol, price: r.price, updatedAt: Date.now() })
         }
       })
     }
 
-    // CN via Tushare
-    const cnSymbols = needsRefresh(symbolsByMarket.CN)
-    if (cnSymbols.length > 0 && config.apiKeys.tushare) {
-      tushareLimiter.execute(async () => {
-        const results = await tushareProvider.fetchPrices(cnSymbols, config.apiKeys.tushare)
-        for (const r of results) {
-          await db.priceCache.put({ symbol: r.symbol, price: r.price, updatedAt: Date.now() })
-        }
-      })
-    }
-
-    // Crypto via CoinGecko (no key needed)
-    const cryptoSymbols = needsRefresh(symbolsByMarket.CRYPTO)
-    if (cryptoSymbols.length > 0) {
-      coingeckoLimiter.execute(async () => {
-        const results = await coingeckoProvider.fetchPrices(cryptoSymbols)
-        for (const r of results) {
-          await db.priceCache.put({ symbol: r.symbol, price: r.price, updatedAt: Date.now() })
-        }
-      })
-    }
   }, [config, symbolsByMarket, priceMap])
 
   // Auto-refresh on mount and on interval

@@ -25,7 +25,7 @@ export function getAllocationColor(market: string): string {
 export function AllocationPieChart({ data }: Props) {
   if (data.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-[var(--text-muted)] text-sm">
+      <div className="h-48 flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>
         No holdings
       </div>
     )
@@ -38,11 +38,12 @@ export function AllocationPieChart({ data }: Props) {
           data={data}
           cx="50%"
           cy="50%"
-          innerRadius={50}
-          outerRadius={80}
+          innerRadius={55}
+          outerRadius={85}
           dataKey="value"
           nameKey="name"
-          strokeWidth={0}
+          strokeWidth={2}
+          stroke="var(--bg-primary)"
         >
           {data.map((entry, i) => (
             <Cell key={i} fill={entry.color} />
@@ -52,9 +53,10 @@ export function AllocationPieChart({ data }: Props) {
           contentStyle={{
             backgroundColor: 'var(--bg-secondary)',
             border: '1px solid var(--border)',
-            borderRadius: '6px',
-            fontFamily: 'monospace',
+            borderRadius: '12px',
+            fontFamily: 'var(--font-mono)',
             fontSize: '12px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
           }}
           formatter={(value) =>
             typeof value === 'number'

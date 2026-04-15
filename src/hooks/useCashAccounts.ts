@@ -17,5 +17,12 @@ export function useCashAccounts() {
     await db.cashAccounts.put(account)
   }
 
-  return { accounts: accounts ?? [], addAccount, deleteAccount, updateAccount }
+  async function adjustBalance(id: string, amount: number) {
+    const acc = await db.cashAccounts.get(id)
+    if (acc) {
+      await db.cashAccounts.update(id, { balance: acc.balance + amount })
+    }
+  }
+
+  return { accounts: accounts ?? [], addAccount, deleteAccount, updateAccount, adjustBalance }
 }

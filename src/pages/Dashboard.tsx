@@ -12,7 +12,7 @@ import type { Market } from '../types'
 
 export function Dashboard() {
   const { config } = useConfig()
-  const { holdings, holdingsByMarket } = useHoldings()
+  const { holdings, holdingsByMarket, totalRealizedPnl, totalFees } = useHoldings()
   const { accounts } = useCashAccounts()
   const { convert } = useExchangeRates()
   const { snapshots } = useSnapshots()
@@ -27,10 +27,10 @@ export function Dashboard() {
   const { getPrice } = usePrices(symbolsByMarket)
   const baseCurrency = config?.baseCurrency ?? 'USD'
 
-  const { totalValue, totalCost, marketValues } = useMemo(() => {
+  const { totalValue, totalCost, holdingValues } = useMemo(() => {
     let totalValue = 0
     let totalCost = 0
-    const marketValues: Record<string, number> = {}
+    const holdingValues: { name: string; market: string; value: number }[] = []
 
     for (const h of holdings) {
       const priceInfo = getPrice(h.symbol)
@@ -43,69 +43,92 @@ export function Dashboard() {
 
       totalValue += convertedMv
       totalCost += convertedCost
-      marketValues[h.market] = (marketValues[h.market] ?? 0) + convertedMv
+      holdingValues.push({ name: h.symbol, market: h.market, value: convertedMv })
     }
 
     for (const acc of accounts) {
       const converted = convert(acc.balance, acc.currency, baseCurrency)
       totalValue += converted
       totalCost += converted
-      marketValues['CASH'] = (marketValues['CASH'] ?? 0) + converted
+      holdingValues.push({ name: acc.name, market: 'CASH', value: converted })
     }
 
-    return { totalValue, totalCost, marketValues }
+    return { totalValue, totalCost, holdingValues }
   }, [holdings, accounts, getPrice, convert, baseCurrency])
 
-  const totalPnl = totalValue - totalCost
+  const unrealizedPnl = totalValue - totalCost
+  const totalPnl = unrealizedPnl + totalRealizedPnl
   const totalPnlPct = totalCost > 0 ? (totalPnl / totalCost) * 100 : 0
 
-  const allocationData = Object.entries(marketValues)
-    .filter(([, v]) => v > 0)
-    .map(([market, value]) => ({
-      name: market,
-      value,
-      color: getAllocationColor(market),
+  const allocationData = holdingValues
+    .filter(h => h.value > 0)
+    .sort((a, b) => b.value - a.value)
+    .map(h => ({
+      name: h.name,
+      value: h.value,
+      color: getAllocationColor(h.market),
     }))
 
-  const pnlColor = totalPnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'
+  const isUp = totalPnl >= 0
   const pnlSign = totalPnl >= 0 ? '+' : ''
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4">
-      <div className="flex gap-3">
-        <div className="flex-1 bg-[var(--bg-secondary)] p-4 rounded-lg border-l-[3px] border-[var(--accent-green)]">
-          <div className="text-[9px] uppercase text-[var(--text-muted)]">Total Value</div>
-          <div className="text-xl font-bold text-[var(--accent-green)]">
+    <div className="max-w-4xl mx-auto space-y-5">
+      {/* Hero Stats */}
+      <div className="flex gap-4 animate-fade-in">
+        <div className={`flex-1 card-glass p-5 ${isUp ? 'glow-green' : 'glow-red'}`}>
+          <div className="label mb-2">Total Value</div>
+          <div className="font-data text-3xl font-bold tracking-tight" style={{ color: 'var(--accent-green)' }}>
             {baseCurrency} {totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
         </div>
-        <div className="flex-1 bg-[var(--bg-secondary)] p-4 rounded-lg border-l-[3px] border-[var(--accent-blue)]">
-          <div className="text-[9px] uppercase text-[var(--text-muted)]">Total P&L</div>
-          <div className="text-xl font-bold" style={{ color: pnlColor }}>
+        <div className="flex-1 card-glass p-5">
+          <div className="label mb-2">Total P&L</div>
+          <div className="font-data text-3xl font-bold tracking-tight" style={{ color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>
             {pnlSign}{baseCurrency} {Math.abs(totalPnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
-          <div className="text-xs" style={{ color: pnlColor }}>
+          <div className="font-data text-sm mt-1" style={{ color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>
             {pnlSign}{totalPnlPct.toFixed(1)}%
+          </div>
+          <div className="mt-4 space-y-1.5">
+            {[
+              { label: 'Unrealized', value: unrealizedPnl, showSign: true },
+              { label: 'Realized', value: totalRealizedPnl, showSign: true },
+              { label: 'Fees', value: -totalFees, showSign: false },
+            ].map(item => (
+              <div key={item.label} className="flex justify-between items-center">
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{item.label}</span>
+                <span className="font-data text-xs" style={{
+                  color: item.showSign
+                    ? item.value >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'
+                    : 'var(--text-muted)'
+                }}>
+                  {item.showSign && item.value >= 0 ? '+' : ''}{baseCurrency} {Math.abs(item.value).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg">
-        <div className="text-[9px] uppercase text-[var(--text-muted)] mb-2">Net Value</div>
+      {/* Net Value Chart */}
+      <div className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <div className="label mb-3">Net Value</div>
         <NetValueChart snapshots={snapshots} />
       </div>
 
-      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg">
-        <div className="text-[9px] uppercase text-[var(--text-muted)] mb-2">Allocation</div>
+      {/* Allocation */}
+      <div className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.15s' }}>
+        <div className="label mb-3">Allocation</div>
         <div className="flex items-center">
           <div className="flex-1">
             <AllocationPieChart data={allocationData} />
           </div>
-          <div className="w-32 text-xs space-y-1">
+          <div className="w-36 space-y-2">
             {allocationData.map(d => (
               <div key={d.name} className="flex items-center justify-between">
-                <span style={{ color: d.color }}>● {d.name}</span>
-                <span className="text-[var(--text-secondary)]">
+                <span className="text-xs font-medium" style={{ color: d.color }}>● {d.name}</span>
+                <span className="font-data text-xs" style={{ color: 'var(--text-secondary)' }}>
                   {totalValue > 0 ? ((d.value / totalValue) * 100).toFixed(0) : 0}%
                 </span>
               </div>
@@ -114,24 +137,31 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg">
-        <div className="text-[9px] uppercase text-[var(--text-muted)] mb-2">Holdings</div>
+      {/* Holdings */}
+      <div className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="label mb-3">Holdings</div>
         {holdings.length === 0 ? (
-          <div className="text-sm text-[var(--text-muted)]">No holdings yet. Press ⌘N to add a transaction.</div>
+          <div className="text-sm" style={{ color: 'var(--text-muted)' }}>No holdings yet. Add a transaction to get started.</div>
         ) : (
           <div className="space-y-1">
             {holdings.map(h => {
               const priceInfo = getPrice(h.symbol)
               const currentPrice = priceInfo?.price ?? 0
+              const marketVal = convert(currentPrice * h.totalShares, h.currency, baseCurrency)
               const pnlPct = h.avgCost > 0 ? ((currentPrice - h.avgCost) / h.avgCost) * 100 : 0
-              const isUp = pnlPct >= 0
+              const up = pnlPct >= 0
               return (
-                <div key={h.symbol} className="flex items-center justify-between py-1 border-b border-[var(--bg-primary)]">
-                  <span className="text-[var(--text-primary)]">{h.symbol}</span>
-                  <span className={isUp ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]'}>
-                    {isUp ? '+' : ''}{pnlPct.toFixed(1)}%
-                    {priceInfo && <PriceStatus stale={priceInfo.stale} />}
-                  </span>
+                <div key={h.symbol} className="flex items-center justify-between py-2 transition-colors rounded-lg px-2 hover:bg-[var(--bg-tertiary)]" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{h.symbol}</span>
+                  <div className="text-right">
+                    <span className="font-data text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      {baseCurrency} {marketVal.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    </span>
+                    <span className={`font-data ml-2 text-xs`} style={{ color: up ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                      {up ? '+' : ''}{pnlPct.toFixed(1)}%
+                      {priceInfo && <PriceStatus stale={priceInfo.stale} />}
+                    </span>
+                  </div>
                 </div>
               )
             })}

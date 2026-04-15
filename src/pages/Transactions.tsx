@@ -1,17 +1,11 @@
 import { useState, useMemo } from 'react'
-import { useOutletContext } from 'react-router-dom'
 import { useTransactions } from '../hooks/useTransactions'
 import { TransactionModal } from '../components/TransactionModal'
 import type { Transaction, Market } from '../types'
 
-interface LayoutContext {
-  txnModalOpen: boolean
-  setTxnModalOpen: (open: boolean) => void
-}
-
 export function Transactions() {
-  const { txnModalOpen, setTxnModalOpen } = useOutletContext<LayoutContext>()
   const { transactions, addTransaction, deleteTransaction, updateTransaction } = useTransactions()
+  const [editModalOpen, setEditModalOpen] = useState(false)
   const [editingTxn, setEditingTxn] = useState<Transaction | undefined>()
   const [filterMarket, setFilterMarket] = useState<Market | 'ALL'>('ALL')
 
@@ -31,76 +25,79 @@ export function Transactions() {
 
   function handleEdit(txn: Transaction) {
     setEditingTxn(txn)
-    setTxnModalOpen(true)
+    setEditModalOpen(true)
   }
 
   function handleCloseModal() {
-    setTxnModalOpen(false)
+    setEditModalOpen(false)
     setEditingTxn(undefined)
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex gap-2">
-          {(['ALL', 'US', 'CN', 'HK', 'CRYPTO'] as const).map(m => (
+    <div className="max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex gap-1">
+          {(['ALL', 'US', 'CRYPTO'] as const).map(m => (
             <button
               key={m}
               onClick={() => setFilterMarket(m)}
-              className={`px-2 py-1 text-xs rounded transition-colors ${
-                filterMarket === m
-                  ? 'bg-[var(--accent-green)] text-[var(--bg-primary)]'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-              }`}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200"
+              style={filterMarket === m
+                ? { background: 'var(--accent-green)', color: 'var(--bg-primary)' }
+                : { color: 'var(--text-muted)' }
+              }
             >
               {m}
             </button>
           ))}
         </div>
-        <button
-          onClick={() => { setEditingTxn(undefined); setTxnModalOpen(true) }}
-          className="text-xs text-[var(--accent-green)] hover:underline"
-        >
-          + New (⌘N)
-        </button>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center text-[var(--text-muted)] py-8">
-          No transactions yet. Press ⌘N to add one.
+        <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
+          No transactions yet. Click + New to add one.
         </div>
       ) : (
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           {filtered.map(txn => (
             <div
               key={txn.id}
-              className="flex items-center justify-between bg-[var(--bg-secondary)] px-3 py-2 rounded hover:bg-[var(--bg-tertiary)] transition-colors group"
+              className="flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group hover:scale-[1.003]"
+              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
             >
               <div className="flex items-center gap-3">
-                <span className={`text-xs px-1.5 py-0.5 rounded ${
-                  txn.type === 'BUY'
-                    ? 'bg-[var(--accent-green)]/20 text-[var(--accent-green)]'
-                    : 'bg-[var(--accent-red)]/20 text-[var(--accent-red)]'
-                }`}>
+                <span
+                  className="text-[10px] font-semibold px-2 py-1 rounded-md"
+                  style={{
+                    background: txn.type === 'BUY' ? 'var(--glow-green)' : 'var(--glow-red)',
+                    color: txn.type === 'BUY' ? 'var(--accent-green)' : 'var(--accent-red)',
+                  }}
+                >
                   {txn.type}
                 </span>
-                <span className="text-sm text-[var(--text-primary)]">{txn.symbol}</span>
-                <span className="text-xs text-[var(--text-muted)]">
+                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{txn.symbol}</span>
+                <span className="font-data text-xs" style={{ color: 'var(--text-muted)' }}>
                   {txn.shares} @ {txn.price}
                 </span>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-[var(--text-muted)]">{txn.date}</span>
-                <div className="opacity-0 group-hover:opacity-100 flex gap-2 transition-opacity">
+              <div className="flex items-center gap-4">
+                <span className="font-data text-xs" style={{ color: 'var(--text-muted)' }}>{txn.date}</span>
+                <div className="opacity-0 group-hover:opacity-100 flex gap-3 transition-opacity duration-200">
                   <button
                     onClick={() => handleEdit(txn)}
-                    className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    className="text-xs font-medium transition-colors"
+                    style={{ color: 'var(--text-muted)' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
                   >
                     edit
                   </button>
                   <button
                     onClick={() => deleteTransaction(txn.id)}
-                    className="text-xs text-[var(--text-muted)] hover:text-[var(--accent-red)]"
+                    className="text-xs font-medium transition-colors"
+                    style={{ color: 'var(--text-muted)' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent-red)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
                   >
                     del
                   </button>
@@ -112,7 +109,7 @@ export function Transactions() {
       )}
 
       <TransactionModal
-        open={txnModalOpen}
+        open={editModalOpen}
         onClose={handleCloseModal}
         onSave={handleSave}
         initial={editingTxn}

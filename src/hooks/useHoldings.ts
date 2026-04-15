@@ -1,12 +1,23 @@
 import { useMemo } from 'react'
 import { useTransactions } from './useTransactions'
-import { aggregateHoldings } from '../services/portfolio'
+import { activeHoldings, aggregateHoldings } from '../services/portfolio'
 import type { Market } from '../types'
 
 export function useHoldings() {
   const { transactions } = useTransactions()
 
-  const holdings = useMemo(() => aggregateHoldings(transactions), [transactions])
+  const holdings = useMemo(() => activeHoldings(transactions), [transactions])
+  const allHoldings = useMemo(() => aggregateHoldings(transactions), [transactions])
+
+  const totalRealizedPnl = useMemo(
+    () => allHoldings.reduce((sum, h) => sum + h.realizedPnl, 0),
+    [allHoldings]
+  )
+
+  const totalFees = useMemo(
+    () => allHoldings.reduce((sum, h) => sum + h.totalFees, 0),
+    [allHoldings]
+  )
 
   const holdingsByMarket = useMemo(() => {
     const grouped: Record<Market, typeof holdings> = { US: [], CN: [], HK: [], CRYPTO: [] }
@@ -16,5 +27,5 @@ export function useHoldings() {
     return grouped
   }, [holdings])
 
-  return { holdings, holdingsByMarket }
+  return { holdings, holdingsByMarket, totalRealizedPnl, totalFees }
 }

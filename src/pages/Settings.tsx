@@ -24,7 +24,7 @@ export function Settings() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `tv-portfolio-${new Date().toISOString().slice(0, 10)}.json`
+      a.download = `rumble-${new Date().toISOString().slice(0, 10)}.json`
       a.click()
       URL.revokeObjectURL(url)
       setExportStatus('Exported successfully')
@@ -44,12 +44,35 @@ export function Settings() {
         setImportStatus('Invalid file format')
         return
       }
+      // Clear existing data before import
+      await db.transactions.clear()
+      await db.cashAccounts.clear()
+      await db.snapshots.clear()
+
       for (const txn of data.transactions) {
         await db.transactions.put(txn)
       }
       if (data.cashAccounts) {
         for (const acc of data.cashAccounts) {
           await db.cashAccounts.put(acc)
+        }
+      } else {
+        // No cash data in export — rebuild from transactions
+        const cashMap = new Map<string, number>()
+        const sorted = [...data.transactions].sort((a: { date: string }, b: { date: string }) => a.date.localeCompare(b.date))
+        for (const txn of sorted) {
+          const impact = txn.type === 'BUY'
+            ? -(txn.price * txn.shares + (txn.fee ?? 0))
+            : txn.price * txn.shares - (txn.fee ?? 0)
+          cashMap.set(txn.currency, (cashMap.get(txn.currency) ?? 0) + impact)
+        }
+        for (const [currency, balance] of cashMap) {
+          await db.cashAccounts.put({
+            id: crypto.randomUUID(),
+            name: currency,
+            currency,
+            balance,
+          })
         }
       }
       if (data.snapshots) {
@@ -67,57 +90,43 @@ export function Settings() {
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
-      <section>
-        <h3 className="text-xs uppercase text-[var(--text-muted)] mb-3">API Keys</h3>
-        <div className="space-y-3">
+      <section className="card-glass p-5 animate-fade-in">
+        <div className="label mb-4">API Keys</div>
+        <div className="space-y-4">
           <div>
-            <label className="block text-xs text-[var(--text-secondary)] mb-1">Finnhub (US + HK stocks)</label>
+            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Finnhub (US stocks + Crypto)</label>
             <input
               type="password"
               value={config.apiKeys.finnhub ?? ''}
               onChange={e => updateConfig({ apiKeys: { ...config.apiKeys, finnhub: e.target.value || undefined } })}
               placeholder="Enter Finnhub API key"
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded px-3 py-2 text-sm text-[var(--text-primary)] font-mono outline-none focus:border-[var(--accent-green)]"
+              className="input-field"
             />
           </div>
           <div>
-            <label className="block text-xs text-[var(--text-secondary)] mb-1">Tushare (A stocks)</label>
-            <input
-              type="password"
-              value={config.apiKeys.tushare ?? ''}
-              onChange={e => updateConfig({ apiKeys: { ...config.apiKeys, tushare: e.target.value || undefined } })}
-              placeholder="Enter Tushare token"
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded px-3 py-2 text-sm text-[var(--text-primary)] font-mono outline-none focus:border-[var(--accent-green)]"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--text-secondary)] mb-1">ExchangeRate-API (currency rates)</label>
+            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>ExchangeRate-API (currency rates)</label>
             <input
               type="password"
               value={config.apiKeys.exchangeRate ?? ''}
               onChange={e => updateConfig({ apiKeys: { ...config.apiKeys, exchangeRate: e.target.value || undefined } })}
               placeholder="Enter ExchangeRate-API key"
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded px-3 py-2 text-sm text-[var(--text-primary)] font-mono outline-none focus:border-[var(--accent-green)]"
+              className="input-field"
             />
           </div>
-          <p className="text-[10px] text-[var(--text-muted)]">
-            CoinGecko (crypto) is free and does not require an API key.
+          <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+            Finnhub also provides crypto prices (via Binance).
           </p>
         </div>
       </section>
 
-      <section>
-        <h3 className="text-xs uppercase text-[var(--text-muted)] mb-3">Base Currency</h3>
-        <div className="flex gap-2">
+      <section className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.05s' }}>
+        <div className="label mb-4">Base Currency</div>
+        <div className="toggle-group" style={{ maxWidth: '240px' }}>
           {(['USD', 'CNY', 'HKD'] as Currency[]).map(c => (
             <button
               key={c}
               onClick={() => updateConfig({ baseCurrency: c })}
-              className={`px-4 py-2 rounded text-sm transition-colors ${
-                config.baseCurrency === c
-                  ? 'bg-[var(--accent-blue)] text-white'
-                  : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-              }`}
+              className={config.baseCurrency === c ? 'active' : ''}
             >
               {c}
             </button>
@@ -125,37 +134,41 @@ export function Settings() {
         </div>
       </section>
 
-      <section>
-        <h3 className="text-xs uppercase text-[var(--text-muted)] mb-3">Price Refresh Interval</h3>
-        <div className="flex items-center gap-2">
+      <section className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <div className="label mb-4">Price Refresh Interval</div>
+        <div className="flex items-center gap-3">
           <input
             type="number"
             min={1}
             max={60}
             value={config.priceRefreshInterval}
             onChange={e => updateConfig({ priceRefreshInterval: parseInt(e.target.value) || 5 })}
-            className="w-20 bg-[var(--bg-secondary)] border border-[var(--border)] rounded px-3 py-2 text-sm text-[var(--text-primary)] font-mono outline-none focus:border-[var(--accent-green)]"
+            className="input-field !w-20"
           />
-          <span className="text-xs text-[var(--text-muted)]">minutes</span>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>minutes</span>
         </div>
       </section>
 
-      <section>
-        <h3 className="text-xs uppercase text-[var(--text-muted)] mb-3">Data</h3>
+      <section className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.15s' }}>
+        <div className="label mb-4">Data</div>
         <div className="flex gap-3">
           <button
             onClick={handleExport}
-            className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded text-sm text-[var(--text-secondary)] hover:border-[var(--accent-green)] hover:text-[var(--accent-green)] transition-colors"
+            className="px-4 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 hover:scale-[1.02]"
+            style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
           >
             Export JSON
           </button>
-          <label className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded text-sm text-[var(--text-secondary)] hover:border-[var(--accent-green)] hover:text-[var(--accent-green)] transition-colors cursor-pointer">
+          <label
+            className="px-4 py-2.5 rounded-xl text-xs font-medium cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+            style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+          >
             Import JSON
             <input type="file" accept=".json" onChange={handleImport} className="hidden" />
           </label>
         </div>
-        {exportStatus && <p className="text-xs text-[var(--accent-green)] mt-2">{exportStatus}</p>}
-        {importStatus && <p className="text-xs text-[var(--accent-green)] mt-2">{importStatus}</p>}
+        {exportStatus && <p className="text-xs mt-3" style={{ color: 'var(--accent-green)' }}>{exportStatus}</p>}
+        {importStatus && <p className="text-xs mt-3" style={{ color: 'var(--accent-green)' }}>{importStatus}</p>}
       </section>
     </div>
   )
