@@ -20,7 +20,7 @@ export function Layout() {
       <header className="sticky top-0 z-40 px-5 py-3" style={{ background: 'rgba(6, 9, 15, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center gap-6">
-            <span className="text-lg font-bold tracking-tight" style={{ color: 'var(--accent-green)', fontFamily: 'var(--font-mono)' }}>Rumble</span>
+            <a href="https://github.com/LostInAurora/rumble" target="_blank" rel="noopener noreferrer" className="text-lg font-bold tracking-tight hover:opacity-80 transition-opacity" style={{ color: 'var(--accent-green)', fontFamily: 'var(--font-mono)', textDecoration: 'none' }}>Rumble</a>
             <nav className="flex items-center gap-0.5">
               {NAV_ITEMS.map(item => (
                 <NavLink

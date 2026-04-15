@@ -19,6 +19,7 @@ A personal investment portfolio tracker built with React. Track US stocks, crypt
 - React 19 + TypeScript
 - Vite
 - Tailwind CSS 4
+- Capacitor (Android native wrapper)
 - Dexie.js (IndexedDB)
 - Recharts
 - JetBrains Mono + DM Sans fonts
@@ -85,6 +86,23 @@ Go to **Holdings** and find the Cash section:
 Go to **Settings > Data**:
 - **Export JSON** — Download all your data
 - **Import JSON** — Restore from a backup file (replaces existing data)
+
+## Android
+
+Rumble can run as a native Android app via Capacitor.
+
+### Prerequisites
+
+- Android Studio with SDK 24+
+- Java 17+
+
+### Build & Run
+
+```bash
+npm run cap:sync       # Build web + sync to Android
+npm run cap:open       # Open in Android Studio
+npm run cap:run        # Build + sync + run on device/emulator
+```
 
 ## Supported Crypto Symbols
 

@@ -26,3 +26,12 @@ dist-ssr
 .superpowers/
 .playwright-mcp/
 *.png
+
+# Android
+android/app/build/
+android/.gradle/
+android/build/
+android/captures/
+android/.idea/
+*.iml
+local.properties

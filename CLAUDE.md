@@ -10,11 +10,14 @@ npm run build        # Type-check + production build
 npm run lint         # ESLint
 npm run test         # Run tests once (vitest)
 npm run test:watch   # Run tests in watch mode
+npm run cap:sync     # Build web + sync to Android
+npm run cap:open     # Open Android project in Android Studio
+npm run cap:run      # Build + sync + run on device/emulator
 ```
 
 ## Architecture
 
-Rumble is a **pure frontend** React app — no backend server. All data is stored in the browser's IndexedDB via Dexie.js.
+Rumble is a **pure frontend** React app — no backend server. All data is stored in IndexedDB via Dexie.js. Runs in browser or as a native Android app via Capacitor.
 
 ### Data Flow
 
@@ -41,6 +44,7 @@ Pages/Components → Hooks (business logic) → Services (algorithms/API) → De
 - **Cash auto-management**: Buy deducts `price × shares + fee` from the currency's cash account. Sell adds `price × shares - fee`. If no matching account exists, one is created.
 - **Daily snapshots**: `SnapshotRecorder` in `App.tsx` records portfolio value once per day on app load.
 - **CN/HK markets**: Types exist but UI only shows US and CRYPTO (Finnhub free tier limitation). Can be re-enabled if price sources are added.
+- **Capacitor / Android**: Uses `HashRouter` (not `BrowserRouter`) for compatibility with Capacitor's file:// protocol. Vite `base: './'` ensures relative asset paths. Android WebView has no CORS restrictions so Finnhub API works directly. Config in `capacitor.config.ts`, native project in `android/`.
 
 ### Styling
 

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Rumble</string>
+    <string name="title_activity_main">Rumble</string>
+    <string name="package_name">com.rumble.app</string>
+    <string name="custom_url_scheme">com.rumble.app</string>
+</resources>

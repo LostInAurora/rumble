@@ -70,7 +70,7 @@ export function Settings() {
           await db.cashAccounts.put({
             id: crypto.randomUUID(),
             name: currency,
-            currency,
+            currency: currency as Currency,
             balance,
           })
         }

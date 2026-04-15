@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { Dashboard } from './pages/Dashboard'
 import { Holdings } from './pages/Holdings'
@@ -52,7 +52,7 @@ function SnapshotRecorder() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <SnapshotRecorder />
       <Routes>
         <Route element={<Layout />}>
@@ -63,7 +63,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
