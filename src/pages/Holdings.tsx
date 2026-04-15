@@ -2,11 +2,9 @@ import { useState, useMemo } from 'react'
 import { useHoldings } from '../hooks/useHoldings'
 import { usePrices } from '../hooks/usePrices'
 import { useCashAccounts } from '../hooks/useCashAccounts'
-import { useExchangeRates } from '../hooks/useExchangeRates'
-import { useConfig } from '../hooks/useConfig'
 import { PriceStatus } from '../components/PriceStatus'
 import { CashAccountModal } from '../components/CashAccountModal'
-import type { Market, Currency } from '../types'
+import type { Market } from '../types'
 import type { AggregatedHolding } from '../services/portfolio'
 
 const MARKET_LABELS: Record<string, { label: string; color: string }> = {
@@ -17,20 +15,15 @@ const MARKET_LABELS: Record<string, { label: string; color: string }> = {
   CASH: { label: '💵 Cash', color: 'var(--accent-green)' },
 }
 
-function formatCurrency(value: number, currency: string): string {
-  const symbols: Record<string, string> = { USD: '$', CNY: '¥', HKD: 'HK$' }
-  const sym = symbols[currency] ?? currency
-  return `${sym}${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+function formatUsd(value: number): string {
+  return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 export function Holdings() {
-  const { config } = useConfig()
   const { holdingsByMarket, deleteBySymbol } = useHoldings()
   const { accounts, addAccount, deleteAccount, adjustBalance } = useCashAccounts()
-  const { convert } = useExchangeRates()
-  const baseCurrency = config?.baseCurrency ?? 'USD'
   const [cashModalOpen, setCashModalOpen] = useState(false)
-  const [adjustTarget, setAdjustTarget] = useState<{ id: string; name: string; currency: string; type: 'deposit' | 'withdraw' } | null>(null)
+  const [adjustTarget, setAdjustTarget] = useState<{ id: string; name: string; type: 'deposit' | 'withdraw' } | null>(null)
   const [adjustAmount, setAdjustAmount] = useState('')
 
   const symbolsByMarket: Record<Market, string[]> = useMemo(() => ({
@@ -44,7 +37,7 @@ export function Holdings() {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const toggle = (market: string) => setCollapsed(c => ({ ...c, [market]: !c[market] }))
 
-  function renderMarketGroup(market: string, holdings: AggregatedHolding[], currency: Currency) {
+  function renderMarketGroup(market: string, holdings: AggregatedHolding[]) {
     const info = MARKET_LABELS[market]
     if (!info || holdings.length === 0) return null
 
@@ -78,8 +71,8 @@ export function Holdings() {
         >
           <span className="text-xs font-semibold tracking-wide" style={{ color: info.color }}>{info.label}</span>
           <span className="font-data text-xs" style={{ color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-            {formatCurrency(totalMarketValue, currency)}
-            <span className="ml-1 opacity-70">({isUp ? '+' : ''}{formatCurrency(groupTotalPnl, currency)})</span>
+            {formatUsd(totalMarketValue)}
+            <span className="ml-1 opacity-70">({isUp ? '+' : ''}{formatUsd(groupTotalPnl)})</span>
           </span>
         </div>
         {!collapsed[market] && (
@@ -99,19 +92,19 @@ export function Holdings() {
                     </button>
                   </div>
                   <div className="font-data text-right" style={{ color: r.pnlPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                    {r.unrealizedPnl >= 0 ? '+' : ''}{formatCurrency(r.unrealizedPnl, currency)}
+                    {r.unrealizedPnl >= 0 ? '+' : ''}{formatUsd(r.unrealizedPnl)}
                     <span className="ml-1 opacity-80">({r.pnlPct >= 0 ? '+' : ''}{r.pnlPct.toFixed(1)}%)</span>
                     <PriceStatus stale={r.stale} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
                   <span className="font-data">{r.totalShares} shares</span>
-                  <span className="font-data">Cost {formatCurrency(r.avgCost, currency)} → Now {formatCurrency(r.currentPrice, currency)}</span>
+                  <span className="font-data">Cost {formatUsd(r.avgCost)} → Now {formatUsd(r.currentPrice)}</span>
                 </div>
                 {r.realizedPnl !== 0 && (
                   <div className="mt-1 text-[10px] text-right" style={{ color: 'var(--text-muted)' }}>
                     Realized: <span style={{ color: r.realizedPnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                      {r.realizedPnl >= 0 ? '+' : ''}{formatCurrency(r.realizedPnl, currency)}
+                      {r.realizedPnl >= 0 ? '+' : ''}{formatUsd(r.realizedPnl)}
                     </span>
                   </div>
                 )}
@@ -124,7 +117,7 @@ export function Holdings() {
   }
 
   function renderCashGroup() {
-    const totalCash = accounts.reduce((sum, acc) => sum + convert(acc.balance, acc.currency, baseCurrency), 0)
+    const totalCash = accounts.reduce((sum, acc) => sum + acc.balance, 0)
 
     return (
       <div className="mb-4 animate-fade-in">
@@ -143,7 +136,7 @@ export function Holdings() {
               + Add
             </button>
           </div>
-          <span className="font-data text-xs" style={{ color: 'var(--text-secondary)' }}>{formatCurrency(totalCash, baseCurrency)}</span>
+          <span className="font-data text-xs" style={{ color: 'var(--text-secondary)' }}>{formatUsd(totalCash)}</span>
         </div>
         {!collapsed['CASH'] && (
           <div className="px-4 mt-2 space-y-1">
@@ -152,7 +145,7 @@ export function Holdings() {
                 <div className="flex items-center justify-between">
                   <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{acc.name}</span>
                   <div className="flex items-center gap-3">
-                    <span className="font-data text-sm" style={{ color: 'var(--text-secondary)' }}>{formatCurrency(acc.balance, acc.currency)}</span>
+                    <span className="font-data text-sm" style={{ color: 'var(--text-secondary)' }}>{formatUsd(acc.balance)}</span>
                     <button
                       onClick={() => deleteAccount(acc.id)}
                       className="text-xs transition-colors opacity-40 hover:opacity-100"
@@ -164,14 +157,14 @@ export function Holdings() {
                 </div>
                 <div className="flex gap-3 mt-1.5">
                   <button
-                    onClick={() => { setAdjustTarget({ id: acc.id, name: acc.name, currency: acc.currency, type: 'deposit' }); setAdjustAmount('') }}
+                    onClick={() => { setAdjustTarget({ id: acc.id, name: acc.name, type: 'deposit' }); setAdjustAmount('') }}
                     className="text-[10px] font-medium transition-colors hover:underline"
                     style={{ color: 'var(--accent-green)' }}
                   >
                     + Deposit
                   </button>
                   <button
-                    onClick={() => { setAdjustTarget({ id: acc.id, name: acc.name, currency: acc.currency, type: 'withdraw' }); setAdjustAmount('') }}
+                    onClick={() => { setAdjustTarget({ id: acc.id, name: acc.name, type: 'withdraw' }); setAdjustAmount('') }}
                     className="text-[10px] font-medium transition-colors hover:underline"
                     style={{ color: 'var(--accent-red)' }}
                   >
@@ -186,12 +179,10 @@ export function Holdings() {
     )
   }
 
-  const MARKET_CURRENCY: Record<Market, Currency> = { US: 'USD', CN: 'CNY', HK: 'HKD', CRYPTO: 'USD' }
-
   return (
     <div className="max-w-6xl mx-auto">
       {(['US', 'CRYPTO'] as Market[]).map(market =>
-        renderMarketGroup(market, holdingsByMarket[market], MARKET_CURRENCY[market])
+        renderMarketGroup(market, holdingsByMarket[market])
       )}
       {renderCashGroup()}
       {Object.values(holdingsByMarket).every(g => g.length === 0) && accounts.length === 0 && (
@@ -225,7 +216,7 @@ export function Holdings() {
               <button type="button" onClick={() => setAdjustTarget(null)} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">✕</button>
             </div>
             <div className="mb-5">
-              <label className="label block mb-2">Amount ({adjustTarget.currency})</label>
+              <label className="label block mb-2">Amount (USD)</label>
               <input
                 type="number"
                 step="any"

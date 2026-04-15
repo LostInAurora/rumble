@@ -35,12 +35,12 @@ Pages/Components → Hooks (business logic) → Services (algorithms/API) → De
   - `price/finnhub.ts` — maps crypto symbols to Binance pairs (BTC → BINANCE:BTCUSDT)
   - `price/rate-limiter.ts` — queue-based throttling
 
-- **Database** (`src/db/index.ts`) — single Dexie class with 6 tables: transactions, cashAccounts, priceCache, snapshots, config, exchangeRates
+- **Database** (`src/db/index.ts`) — single Dexie class with 5 tables: transactions, cashAccounts, priceCache, snapshots, config
 
 ### Key Design Decisions
 
 - **Crypto via Finnhub**: Crypto prices use Finnhub's Binance integration, not a separate API. Symbol mapping is in `src/services/price/finnhub.ts`.
-- **Market → Currency**: Hardcoded mapping (US→USD, CN→CNY, HK→HKD, CRYPTO→USD) in `TransactionModal.tsx`. Users don't pick currency directly.
+- **USD only**: All values are in USD. No multi-currency support.
 - **Cash auto-management**: Buy deducts `price × shares + fee` from the currency's cash account. Sell adds `price × shares - fee`. If no matching account exists, one is created.
 - **Daily snapshots**: `SnapshotRecorder` in `App.tsx` records portfolio value once per day on app load.
 - **CN/HK markets**: Types exist but UI only shows US and CRYPTO (Finnhub free tier limitation). Can be re-enabled if price sources are added.

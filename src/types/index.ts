@@ -1,5 +1,5 @@
 export type Market = 'US' | 'CN' | 'HK' | 'CRYPTO'
-export type Currency = 'USD' | 'CNY' | 'HKD'
+export type Currency = 'USD'
 export type TransactionType = 'BUY' | 'SELL'
 
 export interface Transaction {
@@ -36,11 +36,9 @@ export interface DailySnapshot {
 
 export interface AppConfig {
   id: string // always 'default'
-  baseCurrency: Currency
   apiKeys: {
     finnhub?: string
     tushare?: string
-    exchangeRate?: string
   }
   priceRefreshInterval: number // minutes
 }
@@ -54,8 +52,3 @@ export interface Holding {
   currentPrice: number
 }
 
-export interface ExchangeRateCache {
-  pair: string // e.g. "USD_CNY"
-  rate: number
-  updatedAt: number // timestamp ms
-}

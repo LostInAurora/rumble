@@ -2,19 +2,15 @@ import { useMemo, useState } from 'react'
 import { useHoldings } from '../hooks/useHoldings'
 import { usePrices } from '../hooks/usePrices'
 import { useCashAccounts } from '../hooks/useCashAccounts'
-import { useExchangeRates } from '../hooks/useExchangeRates'
 import { useSnapshots } from '../hooks/useSnapshots'
-import { useConfig } from '../hooks/useConfig'
 import { NetValueChart } from '../components/charts/NetValueChart'
 import { AllocationPieChart, getAllocationColor } from '../components/charts/AllocationPieChart'
 import { PriceStatus } from '../components/PriceStatus'
 import type { Market } from '../types'
 
 export function Dashboard() {
-  const { config } = useConfig()
-  const { holdings, holdingsByMarket, totalRealizedPnl, totalFees } = useHoldings()
+  const { holdings, allHoldings, holdingsByMarket } = useHoldings()
   const { accounts } = useCashAccounts()
-  const { convert } = useExchangeRates()
   const { snapshots } = useSnapshots()
 
   const symbolsByMarket: Record<Market, string[]> = useMemo(() => ({
@@ -25,11 +21,12 @@ export function Dashboard() {
   }), [holdingsByMarket])
 
   const { getPrice } = usePrices(symbolsByMarket)
-  const baseCurrency = config?.baseCurrency ?? 'USD'
 
-  const { totalValue, totalCost, holdingValues } = useMemo(() => {
+  const { totalValue, totalCost, holdingValues, totalRealizedPnl, totalFees } = useMemo(() => {
     let totalValue = 0
     let totalCost = 0
+    let totalRealizedPnl = 0
+    let totalFees = 0
     const holdingValues: { name: string; market: string; value: number }[] = []
 
     for (const h of holdings) {
@@ -38,23 +35,24 @@ export function Dashboard() {
       const marketVal = currentPrice * h.totalShares
       const costVal = h.avgCost * h.totalShares
 
-      const convertedMv = convert(marketVal, h.currency, baseCurrency)
-      const convertedCost = convert(costVal, h.currency, baseCurrency)
-
-      totalValue += convertedMv
-      totalCost += convertedCost
-      holdingValues.push({ name: h.symbol, market: h.market, value: convertedMv })
+      totalValue += marketVal
+      totalCost += costVal
+      holdingValues.push({ name: h.symbol, market: h.market, value: marketVal })
     }
 
     for (const acc of accounts) {
-      const converted = convert(acc.balance, acc.currency, baseCurrency)
-      totalValue += converted
-      totalCost += converted
-      holdingValues.push({ name: acc.name, market: 'CASH', value: converted })
+      totalValue += acc.balance
+      totalCost += acc.balance
+      holdingValues.push({ name: acc.name, market: 'CASH', value: acc.balance })
     }
 
-    return { totalValue, totalCost, holdingValues }
-  }, [holdings, accounts, getPrice, convert, baseCurrency])
+    for (const h of allHoldings) {
+      totalRealizedPnl += h.realizedPnl
+      totalFees += h.totalFees
+    }
+
+    return { totalValue, totalCost, holdingValues, totalRealizedPnl, totalFees }
+  }, [holdings, allHoldings, accounts, getPrice])
 
   const unrealizedPnl = totalValue - totalCost
   const totalPnl = unrealizedPnl + totalRealizedPnl
@@ -94,13 +92,13 @@ export function Dashboard() {
         <div className={`flex-1 card-glass p-5 ${isUp ? 'glow-green' : 'glow-red'}`}>
           <div className="label mb-2">Total Value</div>
           <div className="font-data text-3xl font-bold tracking-tight" style={{ color: 'var(--accent-green)' }}>
-            {mask(`${baseCurrency} ${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
+            {mask(`$${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
           </div>
         </div>
         <div className="flex-1 card-glass p-5">
           <div className="label mb-2">Total P&L</div>
           <div className="font-data text-3xl font-bold tracking-tight" style={{ color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-            {mask(`${pnlSign}${baseCurrency} ${Math.abs(totalPnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
+            {mask(`${pnlSign}$${Math.abs(totalPnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
           </div>
           <div className="font-data text-sm mt-1" style={{ color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>
             {pnlSign}{totalPnlPct.toFixed(1)}%
@@ -118,7 +116,7 @@ export function Dashboard() {
                     ? item.value >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'
                     : 'var(--text-muted)'
                 }}>
-                  {mask(`${item.showSign && item.value >= 0 ? '+' : ''}${baseCurrency} ${Math.abs(item.value).toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
+                  {mask(`${item.showSign && item.value >= 0 ? '+' : ''}$${Math.abs(item.value).toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
                 </span>
               </div>
             ))}
@@ -184,8 +182,8 @@ export function Dashboard() {
               .map(h => {
                 const priceInfo = getPrice(h.symbol)
                 const currentPrice = priceInfo?.price ?? 0
-                const marketVal = convert(currentPrice * h.totalShares, h.currency, baseCurrency)
-                const costVal = convert(h.avgCost * h.totalShares, h.currency, baseCurrency)
+                const marketVal = currentPrice * h.totalShares
+                const costVal = h.avgCost * h.totalShares
                 const pnl = marketVal - costVal
                 const pnlPct = h.avgCost > 0 ? ((currentPrice - h.avgCost) / h.avgCost) * 100 : 0
                 return { ...h, priceInfo, currentPrice, marketVal, pnl, pnlPct }

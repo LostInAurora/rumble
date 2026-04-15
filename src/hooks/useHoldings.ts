@@ -27,5 +27,5 @@ export function useHoldings() {
     return grouped
   }, [holdings])
 
-  return { holdings, holdingsByMarket, totalRealizedPnl, totalFees, deleteBySymbol }
+  return { holdings, allHoldings, holdingsByMarket, totalRealizedPnl, totalFees, deleteBySymbol }
 }

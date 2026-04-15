@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import type { Transaction, Market, TransactionType, Currency } from '../types'
+import type { Transaction, Market, TransactionType } from '../types'
 
 interface Props {
   open: boolean
@@ -8,12 +8,6 @@ interface Props {
   initial?: Transaction
 }
 
-const MARKET_CURRENCY: Record<Market, Currency> = {
-  US: 'USD',
-  CN: 'CNY',
-  HK: 'HKD',
-  CRYPTO: 'USD',
-}
 
 export function TransactionModal({ open, onClose, onSave, initial }: Props) {
   const [symbol, setSymbol] = useState(initial?.symbol ?? '')
@@ -42,7 +36,7 @@ export function TransactionModal({ open, onClose, onSave, initial }: Props) {
     }
   }, [open, initial])
 
-  const currency = MARKET_CURRENCY[market]
+  const currency = 'USD'
   const total = (parseFloat(shares) || 0) * (parseFloat(price) || 0) + (parseFloat(fee) || 0)
 
   function handleSubmit(e: React.FormEvent) {

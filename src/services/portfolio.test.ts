@@ -56,7 +56,7 @@ describe('aggregateHoldings', () => {
   it('aggregates multiple symbols across markets', () => {
     const txns: Transaction[] = [
       { id: '1', symbol: 'AAPL', market: 'US', type: 'BUY', shares: 100, price: 150, fee: 0, currency: 'USD', date: '2026-01-01' },
-      { id: '2', symbol: '600519.SH', market: 'CN', type: 'BUY', shares: 200, price: 1680, fee: 5, currency: 'CNY', date: '2026-01-01' },
+      { id: '2', symbol: '600519.SH', market: 'CN', type: 'BUY', shares: 200, price: 1680, fee: 5, currency: 'USD', date: '2026-01-01' },
       { id: '3', symbol: 'BTC', market: 'CRYPTO', type: 'BUY', shares: 1.5, price: 67200, fee: 0, currency: 'USD', date: '2026-01-01' },
     ]
     const result = aggregateHoldings(txns)

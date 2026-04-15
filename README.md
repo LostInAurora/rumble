@@ -11,7 +11,6 @@ A personal investment portfolio tracker built with React. Track US stocks, crypt
 - **Dashboard** — Total value, P&L breakdown, net value chart, allocation pie chart
 - **Analytics** — Monthly returns, transaction activity, market breakdown
 - **Import/Export** — Full data backup and restore as JSON
-- **Currency conversion** — Multi-currency support (USD, CNY, HKD) via ExchangeRate-API
 - **Offline-first** — All data stored in IndexedDB, works without internet
 
 ## Tech Stack
@@ -59,9 +58,7 @@ npm run preview
 Go to **Settings** in the app to configure:
 
 1. **Finnhub API Key** — Required for stock and crypto prices. Get a free key at [finnhub.io](https://finnhub.io/)
-2. **ExchangeRate-API Key** — Optional, for currency conversion. Get one at [exchangerate-api.com](https://www.exchangerate-api.com/)
-3. **Base Currency** — USD, CNY, or HKD
-4. **Price Refresh Interval** — How often to fetch latest prices (default: 5 minutes)
+2. **Price Refresh Interval** — How often to fetch latest prices (default: 5 minutes)
 
 ## Usage
 

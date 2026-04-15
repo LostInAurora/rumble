@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import type { Transaction, CashAccount, PriceCache, DailySnapshot, AppConfig, ExchangeRateCache } from '../types'
+import type { Transaction, CashAccount, PriceCache, DailySnapshot, AppConfig } from '../types'
 
 export class PortfolioDB extends Dexie {
   transactions!: Table<Transaction, string>
@@ -7,7 +7,6 @@ export class PortfolioDB extends Dexie {
   priceCache!: Table<PriceCache, string>
   snapshots!: Table<DailySnapshot, string>
   config!: Table<AppConfig, string>
-  exchangeRates!: Table<ExchangeRateCache, string>
 
   constructor() {
     super('tv-portfolio')
@@ -17,7 +16,6 @@ export class PortfolioDB extends Dexie {
       priceCache: 'symbol',
       snapshots: 'date',
       config: 'id',
-      exchangeRates: 'pair',
     })
   }
 }
@@ -30,7 +28,6 @@ db.on('ready', async () => {
   if (!existing) {
     await db.config.put({
       id: 'default',
-      baseCurrency: 'USD',
       apiKeys: {},
       priceRefreshInterval: 5,
     })

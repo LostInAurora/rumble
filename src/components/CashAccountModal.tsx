@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import type { CashAccount, Currency } from '../types'
+import type { CashAccount } from '../types'
 
 interface Props {
   open: boolean
@@ -10,7 +10,6 @@ interface Props {
 
 export function CashAccountModal({ open, onClose, onSave, initial }: Props) {
   const [name, setName] = useState(initial?.name ?? '')
-  const [currency, setCurrency] = useState<Currency>(initial?.currency ?? 'USD')
   const [balance, setBalance] = useState(initial?.balance?.toString() ?? '')
   const nameRef = useRef<HTMLInputElement>(null)
 
@@ -18,7 +17,6 @@ export function CashAccountModal({ open, onClose, onSave, initial }: Props) {
     if (open) {
       if (!initial) {
         setName('')
-        setCurrency('USD')
         setBalance('')
       }
       setTimeout(() => nameRef.current?.focus(), 0)
@@ -31,7 +29,7 @@ export function CashAccountModal({ open, onClose, onSave, initial }: Props) {
     onSave({
       id: initial?.id ?? crypto.randomUUID(),
       name,
-      currency,
+      currency: 'USD',
       balance: parseFloat(balance),
     })
     onClose()
@@ -63,22 +61,6 @@ export function CashAccountModal({ open, onClose, onSave, initial }: Props) {
             placeholder="Chase, 招商银行..."
             className="input-field"
           />
-        </div>
-
-        <div className="mb-4">
-          <label className="label block mb-2">Currency</label>
-          <div className="toggle-group">
-            {(['USD', 'CNY', 'HKD'] as Currency[]).map(c => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setCurrency(c)}
-                className={currency === c ? 'active' : ''}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
         </div>
 
         <div className="mb-5">

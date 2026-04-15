@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useConfig } from '../hooks/useConfig'
 import { db } from '../db'
-import type { Currency } from '../types'
 
 export function Settings() {
   const { config, updateConfig } = useConfig()
@@ -70,7 +69,7 @@ export function Settings() {
           await db.cashAccounts.put({
             id: crypto.randomUUID(),
             name: currency,
-            currency: currency as Currency,
+            currency: 'USD',
             balance,
           })
         }
@@ -103,16 +102,6 @@ export function Settings() {
               className="input-field"
             />
           </div>
-          <div>
-            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>ExchangeRate-API (currency rates)</label>
-            <input
-              type="password"
-              value={config.apiKeys.exchangeRate ?? ''}
-              onChange={e => updateConfig({ apiKeys: { ...config.apiKeys, exchangeRate: e.target.value || undefined } })}
-              placeholder="Enter ExchangeRate-API key"
-              className="input-field"
-            />
-          </div>
           <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
             Finnhub also provides crypto prices (via Binance).
           </p>
@@ -120,21 +109,6 @@ export function Settings() {
       </section>
 
       <section className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.05s' }}>
-        <div className="label mb-4">Base Currency</div>
-        <div className="toggle-group" style={{ maxWidth: '240px' }}>
-          {(['USD', 'CNY', 'HKD'] as Currency[]).map(c => (
-            <button
-              key={c}
-              onClick={() => updateConfig({ baseCurrency: c })}
-              className={config.baseCurrency === c ? 'active' : ''}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <div className="label mb-4">Price Refresh Interval</div>
         <div className="flex items-center gap-3">
           <input
