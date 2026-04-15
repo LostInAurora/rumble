@@ -10,16 +10,15 @@ interface Props {
   data: AllocationEntry[]
 }
 
-const MARKET_COLORS: Record<string, string> = {
-  US: 'var(--accent-blue)',
-  CN: 'var(--accent-red)',
-  HK: 'var(--accent-yellow)',
-  CRYPTO: 'var(--accent-purple)',
-  CASH: 'var(--accent-green)',
-}
+const PALETTE = [
+  '#00e08e', '#3b82f6', '#a855f7', '#f59e0b', '#ef4444',
+  '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1',
+  '#14b8a6', '#e879f9', '#facc15', '#fb7185', '#22d3ee',
+  '#4ade80', '#818cf8', '#fbbf24', '#f472b6', '#2dd4bf',
+]
 
-export function getAllocationColor(market: string): string {
-  return MARKET_COLORS[market] ?? 'var(--text-muted)'
+export function getAllocationColor(_market: string, index: number = 0): string {
+  return PALETTE[index % PALETTE.length]
 }
 
 export function AllocationPieChart({ data }: Props) {

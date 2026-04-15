@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { HashRouter, Routes, Route } from 'react-router-dom'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { Layout } from './components/Layout'
 import { Dashboard } from './pages/Dashboard'
 import { Holdings } from './pages/Holdings'
@@ -12,14 +13,15 @@ import { useConfig } from './hooks/useConfig'
 
 function SnapshotRecorder() {
   const { config } = useConfig()
+  const txnCount = useLiveQuery(() => db.transactions.count())
+  const cashCount = useLiveQuery(() => db.cashAccounts.count())
 
   useEffect(() => {
-    if (!config) return
+    if (!config || txnCount === undefined || cashCount === undefined) return
 
     async function recordSnapshot() {
       const today = new Date().toISOString().slice(0, 10)
-      const existing = await db.snapshots.get(today)
-      if (existing) return
+      // Always update today's snapshot to reflect latest portfolio state
 
       const transactions = await db.transactions.toArray()
       const holdings = aggregateHoldings(transactions)
@@ -45,7 +47,7 @@ function SnapshotRecorder() {
     }
 
     recordSnapshot()
-  }, [config])
+  }, [config, txnCount, cashCount])
 
   return null
 }

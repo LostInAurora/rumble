@@ -51,5 +51,13 @@ export function useTransactions() {
     await adjustCash(txn.currency, txnCashImpact(txn))
   }
 
-  return { transactions: transactions ?? [], addTransaction, deleteTransaction, updateTransaction }
+  async function deleteBySymbol(symbol: string) {
+    const txns = await db.transactions.where('symbol').equals(symbol).toArray()
+    for (const txn of txns) {
+      await adjustCash(txn.currency, -txnCashImpact(txn))
+    }
+    await db.transactions.where('symbol').equals(symbol).delete()
+  }
+
+  return { transactions: transactions ?? [], addTransaction, deleteTransaction, updateTransaction, deleteBySymbol }
 }

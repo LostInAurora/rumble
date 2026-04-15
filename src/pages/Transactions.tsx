@@ -34,7 +34,7 @@ export function Transactions() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-5">
         <div className="flex gap-1">
           {(['ALL', 'US', 'CRYPTO'] as const).map(m => (

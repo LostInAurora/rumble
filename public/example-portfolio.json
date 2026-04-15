@@ -1,0 +1,291 @@
+{
+  "version": 1,
+  "exportedAt": "2026-04-15T06:00:00.000Z",
+  "transactions": [
+    {
+      "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "symbol": "TSLA",
+      "market": "US",
+      "type": "BUY",
+      "shares": 150,
+      "price": 180.50,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-06-10"
+    },
+    {
+      "id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+      "symbol": "TSLA",
+      "market": "US",
+      "type": "BUY",
+      "shares": 50,
+      "price": 220.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-11-20"
+    },
+    {
+      "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+      "symbol": "NVDA",
+      "market": "US",
+      "type": "BUY",
+      "shares": 80,
+      "price": 95.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-03-15"
+    },
+    {
+      "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      "symbol": "AAPL",
+      "market": "US",
+      "type": "BUY",
+      "shares": 60,
+      "price": 210.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-08-01"
+    },
+    {
+      "id": "b3d4e872-13a4-4d08-9f3e-2c7a6f8d5e91",
+      "symbol": "GOOGL",
+      "market": "US",
+      "type": "BUY",
+      "shares": 40,
+      "price": 170.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-09-12"
+    },
+    {
+      "id": "c56a4180-65aa-42ec-a945-5fd21dec0538",
+      "symbol": "MSTR",
+      "market": "US",
+      "type": "BUY",
+      "shares": 20,
+      "price": 180.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-10-05"
+    },
+    {
+      "id": "d9428888-122b-11e1-b85c-61cd3cbb3210",
+      "symbol": "AMZN",
+      "market": "US",
+      "type": "BUY",
+      "shares": 30,
+      "price": 195.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-07-22"
+    },
+    {
+      "id": "e12b34f5-6789-4abc-def0-1234567890ab",
+      "symbol": "META",
+      "market": "US",
+      "type": "BUY",
+      "shares": 15,
+      "price": 520.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-05-18"
+    },
+    {
+      "id": "f23c45d6-789a-4bcd-ef01-23456789abcd",
+      "symbol": "META",
+      "market": "US",
+      "type": "SELL",
+      "shares": 5,
+      "price": 610.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2026-02-10"
+    },
+    {
+      "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "symbol": "IBIT",
+      "market": "US",
+      "type": "BUY",
+      "shares": 100,
+      "price": 42.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-04-20"
+    },
+    {
+      "id": "2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e",
+      "symbol": "PLTR",
+      "market": "US",
+      "type": "BUY",
+      "shares": 200,
+      "price": 25.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-06-30"
+    },
+    {
+      "id": "3c4d5e6f-7a8b-4c9d-0e1f-2a3b4c5d6e7f",
+      "symbol": "BTC",
+      "market": "CRYPTO",
+      "type": "BUY",
+      "shares": 0.5,
+      "price": 62000,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-05-01"
+    },
+    {
+      "id": "4d5e6f7a-8b9c-4d0e-1f2a-3b4c5d6e7f8a",
+      "symbol": "BTC",
+      "market": "CRYPTO",
+      "type": "BUY",
+      "shares": 0.3,
+      "price": 85000,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-12-15"
+    },
+    {
+      "id": "5e6f7a8b-9c0d-4e1f-2a3b-4c5d6e7f8a9b",
+      "symbol": "ETH",
+      "market": "CRYPTO",
+      "type": "BUY",
+      "shares": 5,
+      "price": 3200,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-06-01"
+    },
+    {
+      "id": "6f7a8b9c-0d1e-4f2a-3b4c-5d6e7f8a9b0c",
+      "symbol": "SOL",
+      "market": "CRYPTO",
+      "type": "BUY",
+      "shares": 50,
+      "price": 140,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-07-10"
+    },
+    {
+      "id": "7a8b9c0d-1e2f-4a3b-4c5d-6e7f8a9b0c1d",
+      "symbol": "COIN",
+      "market": "US",
+      "type": "BUY",
+      "shares": 25,
+      "price": 180.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-08-15"
+    },
+    {
+      "id": "8b9c0d1e-2f3a-4b4c-5d6e-7f8a9b0c1d2e",
+      "symbol": "MSFT",
+      "market": "US",
+      "type": "BUY",
+      "shares": 20,
+      "price": 430.00,
+      "fee": 0,
+      "currency": "USD",
+      "date": "2025-09-20"
+    }
+  ],
+  "cashAccounts": [
+    {
+      "id": "9c0d1e2f-3a4b-4c5d-6e7f-8a9b0c1d2e3f",
+      "name": "USD",
+      "currency": "USD",
+      "balance": 15420.50
+    },
+    {
+      "id": "0d1e2f3a-4b5c-4d6e-7f8a-9b0c1d2e3f4a",
+      "name": "RMB",
+      "currency": "CNY",
+      "balance": 50000
+    }
+  ],
+  "snapshots": [
+    {
+      "date": "2025-10-01",
+      "totalValue": 145000,
+      "breakdown": {
+        "US": 95000,
+        "CRYPTO": 35000,
+        "CASH": 15000
+      }
+    },
+    {
+      "date": "2025-11-01",
+      "totalValue": 158000,
+      "breakdown": {
+        "US": 102000,
+        "CRYPTO": 40000,
+        "CASH": 16000
+      }
+    },
+    {
+      "date": "2025-12-01",
+      "totalValue": 172000,
+      "breakdown": {
+        "US": 110000,
+        "CRYPTO": 46000,
+        "CASH": 16000
+      }
+    },
+    {
+      "date": "2026-01-01",
+      "totalValue": 165000,
+      "breakdown": {
+        "US": 105000,
+        "CRYPTO": 43000,
+        "CASH": 17000
+      }
+    },
+    {
+      "date": "2026-02-01",
+      "totalValue": 185000,
+      "breakdown": {
+        "US": 118000,
+        "CRYPTO": 50000,
+        "CASH": 17000
+      }
+    },
+    {
+      "date": "2026-03-01",
+      "totalValue": 195000,
+      "breakdown": {
+        "US": 125000,
+        "CRYPTO": 52000,
+        "CASH": 18000
+      }
+    },
+    {
+      "date": "2026-04-01",
+      "totalValue": 188000,
+      "breakdown": {
+        "US": 120000,
+        "CRYPTO": 49000,
+        "CASH": 19000
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "totalValue": 202000,
+      "breakdown": {
+        "US": 130000,
+        "CRYPTO": 53000,
+        "CASH": 19000
+      }
+    }
+  ],
+  "config": {
+    "id": "default",
+    "baseCurrency": "USD",
+    "apiKeys": {
+      "finnhub": "d7f3qbhr01qpjqqjblvgd7f3qbhr01qpjqqjbm00",
+      "tushare": "773d351dc345c4ef3254d0763becca2c5478907783a7e3ed512d320f",
+      "exchangeRate": "50a47a99a5612a2c99adee79"
+    },
+    "priceRefreshInterval": 5
+  }
+}

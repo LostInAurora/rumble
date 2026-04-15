@@ -4,7 +4,7 @@ import { activeHoldings, aggregateHoldings } from '../services/portfolio'
 import type { Market } from '../types'
 
 export function useHoldings() {
-  const { transactions } = useTransactions()
+  const { transactions, deleteBySymbol } = useTransactions()
 
   const holdings = useMemo(() => activeHoldings(transactions), [transactions])
   const allHoldings = useMemo(() => aggregateHoldings(transactions), [transactions])
@@ -27,5 +27,5 @@ export function useHoldings() {
     return grouped
   }, [holdings])
 
-  return { holdings, holdingsByMarket, totalRealizedPnl, totalFees }
+  return { holdings, holdingsByMarket, totalRealizedPnl, totalFees, deleteBySymbol }
 }

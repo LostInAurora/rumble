@@ -49,7 +49,7 @@ export function Analytics() {
   }, [transactions])
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
+    <div className="max-w-6xl mx-auto space-y-5">
       <div className="card-glass p-5 animate-fade-in">
         <div className="label mb-4">Monthly Returns (%)</div>
         {monthlyReturns.length === 0 ? (

@@ -7,6 +7,7 @@ import { RateLimiter } from '../services/price/rate-limiter'
 import type { Market } from '../types'
 
 const finnhubLimiter = new RateLimiter(60, 60_000)
+const failedSymbols = new Set<string>()
 
 export function usePrices(symbolsByMarket: Record<Market, string[]>) {
   const { config } = useConfig()
@@ -20,25 +21,40 @@ export function usePrices(symbolsByMarket: Record<Market, string[]>) {
     const now = Date.now()
     const staleMs = (config.priceRefreshInterval ?? 5) * 60_000
 
-    const needsRefresh = (symbols: string[]) =>
-      symbols.filter(s => {
-        const cached = priceMap.get(s)
-        return !cached || now - cached.updatedAt > staleMs
-      })
-
-    // US + HK + CRYPTO via Finnhub
-    const finnhubSymbols = needsRefresh([
+    const allSymbols = [
       ...symbolsByMarket.US,
       ...symbolsByMarket.HK,
       ...symbolsByMarket.CRYPTO,
-    ])
-    if (finnhubSymbols.length > 0 && config.apiKeys.finnhub) {
-      finnhubLimiter.execute(async () => {
-        const results = await finnhubProvider.fetchPrices(finnhubSymbols, config.apiKeys.finnhub)
-        for (const r of results) {
-          await db.priceCache.put({ symbol: r.symbol, price: r.price, updatedAt: Date.now() })
+    ]
+
+    const needsRefresh = allSymbols.filter(s => {
+      const cached = priceMap.get(s)
+      return !cached || now - cached.updatedAt > staleMs
+    })
+
+    // Prioritize previously failed symbols
+    const sorted = needsRefresh.sort((a, b) => {
+      const aFailed = failedSymbols.has(a) ? 0 : 1
+      const bFailed = failedSymbols.has(b) ? 0 : 1
+      return aFailed - bFailed
+    })
+
+    if (sorted.length > 0 && config.apiKeys.finnhub) {
+      for (const symbol of sorted) {
+        try {
+          await finnhubLimiter.execute(async () => {
+            const results = await finnhubProvider.fetchPrices([symbol], config.apiKeys.finnhub)
+            if (results.length > 0) {
+              await db.priceCache.put({ symbol: results[0].symbol, price: results[0].price, updatedAt: Date.now() })
+              failedSymbols.delete(symbol)
+            } else {
+              failedSymbols.add(symbol)
+            }
+          })
+        } catch {
+          failedSymbols.add(symbol)
         }
-      })
+      }
     }
 
   }, [config, symbolsByMarket, priceMap])

@@ -25,7 +25,7 @@ function formatCurrency(value: number, currency: string): string {
 
 export function Holdings() {
   const { config } = useConfig()
-  const { holdingsByMarket } = useHoldings()
+  const { holdingsByMarket, deleteBySymbol } = useHoldings()
   const { accounts, addAccount, deleteAccount, adjustBalance } = useCashAccounts()
   const { convert } = useExchangeRates()
   const baseCurrency = config?.baseCurrency ?? 'USD'
@@ -85,9 +85,19 @@ export function Holdings() {
         {!collapsed[market] && (
           <div className="px-4 mt-2 space-y-1">
             {rows.map(r => (
-              <div key={r.symbol} className="py-3 rounded-lg px-3 transition-colors hover:bg-[var(--bg-tertiary)]" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <div key={r.symbol} className="group py-3 rounded-lg px-3 transition-colors hover:bg-[var(--bg-tertiary)]" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{r.symbol}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{r.symbol}</span>
+                    <button
+                      onClick={() => { if (confirm(`Delete all ${r.symbol} holdings and related transactions?`)) deleteBySymbol(r.symbol) }}
+                      className="text-xs transition-colors opacity-0 group-hover:opacity-40 hover:!opacity-100"
+                      style={{ color: 'var(--accent-red)' }}
+                      title="Delete holding"
+                    >
+                      ×
+                    </button>
+                  </div>
                   <div className="font-data text-right" style={{ color: r.pnlPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
                     {r.unrealizedPnl >= 0 ? '+' : ''}{formatCurrency(r.unrealizedPnl, currency)}
                     <span className="ml-1 opacity-80">({r.pnlPct >= 0 ? '+' : ''}{r.pnlPct.toFixed(1)}%)</span>
@@ -179,7 +189,7 @@ export function Holdings() {
   const MARKET_CURRENCY: Record<Market, Currency> = { US: 'USD', CN: 'CNY', HK: 'HKD', CRYPTO: 'USD' }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       {(['US', 'CRYPTO'] as Market[]).map(market =>
         renderMarketGroup(market, holdingsByMarket[market], MARKET_CURRENCY[market])
       )}

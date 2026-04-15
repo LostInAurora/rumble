@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useHoldings } from '../hooks/useHoldings'
 import { usePrices } from '../hooks/usePrices'
 import { useCashAccounts } from '../hooks/useCashAccounts'
@@ -63,29 +63,44 @@ export function Dashboard() {
   const allocationData = holdingValues
     .filter(h => h.value > 0)
     .sort((a, b) => b.value - a.value)
-    .map(h => ({
+    .map((h, i) => ({
       name: h.name,
       value: h.value,
-      color: getAllocationColor(h.market),
+      color: getAllocationColor(h.market, i),
     }))
 
+  const [sortBy, setSortBy] = useState<'pnl' | 'pnlPct' | 'value'>('pnl')
+  const [hideAmounts, setHideAmounts] = useState(false)
+  const mask = (text: string) => hideAmounts ? '****' : text
   const isUp = totalPnl >= 0
   const pnlSign = totalPnl >= 0 ? '+' : ''
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
+    <div className="max-w-6xl mx-auto space-y-5">
+      {/* Hide toggle */}
+      <div className="flex justify-end animate-fade-in">
+        <button
+          onClick={() => setHideAmounts(h => !h)}
+          className="text-sm px-2 py-1 rounded-lg transition-all hover:scale-105"
+          style={{ color: 'var(--text-muted)' }}
+          title={hideAmounts ? 'Show amounts' : 'Hide amounts'}
+        >
+          {hideAmounts ? '◉' : '◎'}
+        </button>
+      </div>
+
       {/* Hero Stats */}
       <div className="flex gap-4 animate-fade-in">
         <div className={`flex-1 card-glass p-5 ${isUp ? 'glow-green' : 'glow-red'}`}>
           <div className="label mb-2">Total Value</div>
           <div className="font-data text-3xl font-bold tracking-tight" style={{ color: 'var(--accent-green)' }}>
-            {baseCurrency} {totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            {mask(`${baseCurrency} ${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
           </div>
         </div>
         <div className="flex-1 card-glass p-5">
           <div className="label mb-2">Total P&L</div>
           <div className="font-data text-3xl font-bold tracking-tight" style={{ color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-            {pnlSign}{baseCurrency} {Math.abs(totalPnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            {mask(`${pnlSign}${baseCurrency} ${Math.abs(totalPnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
           </div>
           <div className="font-data text-sm mt-1" style={{ color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>
             {pnlSign}{totalPnlPct.toFixed(1)}%
@@ -103,7 +118,7 @@ export function Dashboard() {
                     ? item.value >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'
                     : 'var(--text-muted)'
                 }}>
-                  {item.showSign && item.value >= 0 ? '+' : ''}{baseCurrency} {Math.abs(item.value).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  {mask(`${item.showSign && item.value >= 0 ? '+' : ''}${baseCurrency} ${Math.abs(item.value).toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
                 </span>
               </div>
             ))}
@@ -139,32 +154,64 @@ export function Dashboard() {
 
       {/* Holdings */}
       <div className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-        <div className="label mb-3">Holdings</div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="label">Holdings</div>
+          <div className="toggle-group">
+            {([
+              { key: 'pnl', label: 'P&L' },
+              { key: 'pnlPct', label: '%' },
+              { key: 'value', label: 'Value' },
+            ] as const).map(opt => (
+              <button
+                key={opt.key}
+                onClick={() => setSortBy(opt.key)}
+                className="px-2.5 py-1 text-[10px] font-semibold rounded-md transition-all"
+                style={{
+                  background: sortBy === opt.key ? 'var(--accent-green)' : 'transparent',
+                  color: sortBy === opt.key ? 'var(--bg-primary)' : 'var(--text-muted)',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
         {holdings.length === 0 ? (
           <div className="text-sm" style={{ color: 'var(--text-muted)' }}>No holdings yet. Add a transaction to get started.</div>
         ) : (
           <div className="space-y-1">
-            {holdings.map(h => {
-              const priceInfo = getPrice(h.symbol)
-              const currentPrice = priceInfo?.price ?? 0
-              const marketVal = convert(currentPrice * h.totalShares, h.currency, baseCurrency)
-              const pnlPct = h.avgCost > 0 ? ((currentPrice - h.avgCost) / h.avgCost) * 100 : 0
-              const up = pnlPct >= 0
-              return (
-                <div key={h.symbol} className="flex items-center justify-between py-2 transition-colors rounded-lg px-2 hover:bg-[var(--bg-tertiary)]" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{h.symbol}</span>
-                  <div className="text-right">
-                    <span className="font-data text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {baseCurrency} {marketVal.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                    </span>
-                    <span className={`font-data ml-2 text-xs`} style={{ color: up ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                      {up ? '+' : ''}{pnlPct.toFixed(1)}%
-                      {priceInfo && <PriceStatus stale={priceInfo.stale} />}
-                    </span>
+            {holdings
+              .map(h => {
+                const priceInfo = getPrice(h.symbol)
+                const currentPrice = priceInfo?.price ?? 0
+                const marketVal = convert(currentPrice * h.totalShares, h.currency, baseCurrency)
+                const costVal = convert(h.avgCost * h.totalShares, h.currency, baseCurrency)
+                const pnl = marketVal - costVal
+                const pnlPct = h.avgCost > 0 ? ((currentPrice - h.avgCost) / h.avgCost) * 100 : 0
+                return { ...h, priceInfo, currentPrice, marketVal, pnl, pnlPct }
+              })
+              .sort((a, b) => {
+                if (sortBy === 'pnlPct') return b.pnlPct - a.pnlPct
+                if (sortBy === 'value') return b.marketVal - a.marketVal
+                return b.pnl - a.pnl
+              })
+              .map(h => {
+                const up = h.pnlPct >= 0
+                return (
+                  <div key={h.symbol} className="flex items-center justify-between py-2 transition-colors rounded-lg px-2 hover:bg-[var(--bg-tertiary)]" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{h.symbol}</span>
+                    <div className="text-right">
+                      <span className="font-data text-sm" style={{ color: up ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                        {mask(`${up ? '+' : ''}${Math.abs(h.pnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
+                      </span>
+                      <span className="font-data ml-2 text-xs" style={{ color: up ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                        {up ? '+' : ''}{h.pnlPct.toFixed(1)}%
+                        {h.priceInfo && <PriceStatus stale={h.priceInfo.stale} />}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
           </div>
         )}
       </div>
