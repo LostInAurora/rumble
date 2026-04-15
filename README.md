@@ -1,73 +1,95 @@
-# React + TypeScript + Vite
+# Rumble
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A personal investment portfolio tracker built with React. Track US stocks, cryptocurrencies, and cash accounts — all data stored locally in your browser.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Multi-asset support** — US stocks and crypto (BTC, ETH, BNB, SOL, etc.)
+- **Real-time prices** — Powered by Finnhub API (US stocks + Binance crypto)
+- **P&L tracking** — Realized and unrealized profit/loss with weighted average cost
+- **Cash management** — Auto-deduct on buy, auto-add on sell, manual deposit/withdraw
+- **Dashboard** — Total value, P&L breakdown, net value chart, allocation pie chart
+- **Analytics** — Monthly returns, transaction activity, market breakdown
+- **Import/Export** — Full data backup and restore as JSON
+- **Currency conversion** — Multi-currency support (USD, CNY, HKD) via ExchangeRate-API
+- **Offline-first** — All data stored in IndexedDB, works without internet
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19 + TypeScript
+- Vite
+- Tailwind CSS 4
+- Dexie.js (IndexedDB)
+- Recharts
+- JetBrains Mono + DM Sans fonts
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js 18+
+- npm or yarn
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/LostInAurora/rumble.git
+cd rumble
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Run
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+### Build
+
+```bash
+npm run build
+npm run preview
+```
+
+## Configuration
+
+Go to **Settings** in the app to configure:
+
+1. **Finnhub API Key** — Required for stock and crypto prices. Get a free key at [finnhub.io](https://finnhub.io/)
+2. **ExchangeRate-API Key** — Optional, for currency conversion. Get one at [exchangerate-api.com](https://www.exchangerate-api.com/)
+3. **Base Currency** — USD, CNY, or HKD
+4. **Price Refresh Interval** — How often to fetch latest prices (default: 5 minutes)
+
+## Usage
+
+### Adding a Transaction
+
+Click **+ New** in the top right, then fill in:
+- Symbol (e.g. AAPL, BTC, ETH)
+- Market (US / Crypto)
+- Type (Buy / Sell)
+- Shares, Price, Fee, Date
+
+Cash is automatically adjusted when you buy or sell.
+
+### Managing Cash
+
+Go to **Holdings** and find the Cash section:
+- **+ Add** — Create a new cash account
+- **+ Deposit** / **- Withdraw** — Adjust balance on existing accounts
+
+### Data Backup
+
+Go to **Settings > Data**:
+- **Export JSON** — Download all your data
+- **Import JSON** — Restore from a backup file (replaces existing data)
+
+## Supported Crypto Symbols
+
+BTC, ETH, SOL, DOGE, ADA, DOT, AVAX, LINK, UNI, XRP, BNB, LTC — prices fetched via Finnhub's Binance integration.
+
+## License
+
+MIT
