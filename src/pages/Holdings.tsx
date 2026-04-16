@@ -91,9 +91,12 @@ export function Holdings() {
                       ×
                     </button>
                   </div>
-                  <div className="font-data text-right" style={{ color: r.pnlPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                    {r.unrealizedPnl >= 0 ? '+' : ''}{formatUsd(r.unrealizedPnl)}
-                    <span className="ml-1 opacity-80">({r.pnlPct >= 0 ? '+' : ''}{r.pnlPct.toFixed(1)}%)</span>
+                  <div className="text-right">
+                    <span className="font-data" style={{ color: 'var(--text-primary)' }}>{formatUsd(r.marketVal)}</span>
+                    <span className="font-data ml-2" style={{ color: r.pnlPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                      {r.unrealizedPnl >= 0 ? '+' : ''}{formatUsd(r.unrealizedPnl)}
+                      <span className="ml-1 opacity-80">({r.pnlPct >= 0 ? '+' : ''}{r.pnlPct.toFixed(1)}%)</span>
+                    </span>
                     <PriceStatus stale={r.stale} />
                   </div>
                 </div>
