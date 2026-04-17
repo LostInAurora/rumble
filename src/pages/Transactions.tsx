@@ -62,46 +62,51 @@ export function Transactions() {
           {filtered.map(txn => (
             <div
               key={txn.id}
-              className="flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group hover:scale-[1.003]"
+              className="px-3 sm:px-4 py-3 rounded-xl transition-all duration-200 group hover:scale-[1.003]"
               style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
             >
-              <div className="flex items-center gap-3">
-                <span
-                  className="text-[10px] font-semibold px-2 py-1 rounded-md"
-                  style={{
-                    background: txn.type === 'BUY' ? 'var(--glow-green)' : 'var(--glow-red)',
-                    color: txn.type === 'BUY' ? 'var(--accent-green)' : 'var(--accent-red)',
-                  }}
-                >
-                  {txn.type}
-                </span>
-                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{txn.symbol}</span>
-                <span className="font-data text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {txn.shares} @ {txn.price}
-                </span>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="font-data text-xs" style={{ color: 'var(--text-muted)' }}>{txn.date}</span>
-                <div className="opacity-0 group-hover:opacity-100 flex gap-3 transition-opacity duration-200">
-                  <button
-                    onClick={() => handleEdit(txn)}
-                    className="text-xs font-medium transition-colors"
-                    style={{ color: 'var(--text-muted)' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span
+                    className="text-[10px] font-semibold px-2 py-1 rounded-md"
+                    style={{
+                      background: txn.type === 'BUY' ? 'var(--glow-green)' : 'var(--glow-red)',
+                      color: txn.type === 'BUY' ? 'var(--accent-green)' : 'var(--accent-red)',
+                    }}
                   >
-                    edit
-                  </button>
-                  <button
-                    onClick={() => deleteTransaction(txn.id)}
-                    className="text-xs font-medium transition-colors"
-                    style={{ color: 'var(--text-muted)' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent-red)')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                  >
-                    del
-                  </button>
+                    {txn.type}
+                  </span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{txn.symbol}</span>
+                  <span className="font-data text-xs hidden sm:inline" style={{ color: 'var(--text-muted)' }}>
+                    {txn.shares} @ {txn.price}
+                  </span>
                 </div>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <span className="font-data text-xs" style={{ color: 'var(--text-muted)' }}>{txn.date}</span>
+                  <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 flex gap-3 transition-opacity duration-200">
+                    <button
+                      onClick={() => handleEdit(txn)}
+                      className="text-xs font-medium transition-colors"
+                      style={{ color: 'var(--text-muted)' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+                      onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                    >
+                      edit
+                    </button>
+                    <button
+                      onClick={() => deleteTransaction(txn.id)}
+                      className="text-xs font-medium transition-colors"
+                      style={{ color: 'var(--text-muted)' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent-red)')}
+                      onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                    >
+                      del
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="sm:hidden mt-1.5 font-data text-xs" style={{ color: 'var(--text-muted)' }}>
+                {txn.shares} @ {txn.price}
               </div>
             </div>
           ))}

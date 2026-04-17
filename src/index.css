@@ -223,3 +223,14 @@ body::after {
   background: var(--accent-red);
   color: white;
 }
+
+/* Shared glass bar (header + mobile bottom bar) */
+.bar-glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Mobile bottom bar safe area */
+.mobile-bottom-bar {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

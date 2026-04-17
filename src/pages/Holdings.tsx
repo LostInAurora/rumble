@@ -84,7 +84,7 @@ export function Holdings() {
                     <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{r.symbol}</span>
                     <button
                       onClick={() => { if (confirm(`Delete all ${r.symbol} holdings and related transactions?`)) deleteBySymbol(r.symbol) }}
-                      className="text-xs transition-colors opacity-0 group-hover:opacity-40 hover:!opacity-100"
+                      className="text-xs transition-colors opacity-40 sm:opacity-0 sm:group-hover:opacity-40 hover:!opacity-100"
                       style={{ color: 'var(--accent-red)' }}
                       title="Delete holding"
                     >
@@ -92,17 +92,20 @@ export function Holdings() {
                     </button>
                   </div>
                   <div className="text-right">
-                    <span className="font-data" style={{ color: 'var(--text-primary)' }}>{formatUsd(r.marketVal)}</span>
-                    <span className="font-data ml-2" style={{ color: r.pnlPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                      {r.unrealizedPnl >= 0 ? '+' : ''}{formatUsd(r.unrealizedPnl)}
-                      <span className="ml-1 opacity-80">({r.pnlPct >= 0 ? '+' : ''}{r.pnlPct.toFixed(1)}%)</span>
-                    </span>
+                    <span className="font-data text-sm" style={{ color: 'var(--text-primary)' }}>{formatUsd(r.marketVal)}</span>
                     <PriceStatus stale={r.stale} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
                   <span className="font-data">{r.totalShares} shares</span>
-                  <span className="font-data">Cost {formatUsd(r.avgCost)} → Now {formatUsd(r.currentPrice)}</span>
+                  <span className="font-data" style={{ color: r.pnlPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                    {r.unrealizedPnl >= 0 ? '+' : ''}{formatUsd(r.unrealizedPnl)}
+                    <span className="ml-1 opacity-80">({r.pnlPct >= 0 ? '+' : ''}{r.pnlPct.toFixed(1)}%)</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                  <span className="font-data">Cost {formatUsd(r.avgCost)}</span>
+                  <span className="font-data">Now {formatUsd(r.currentPrice)}</span>
                 </div>
                 {r.realizedPnl !== 0 && (
                   <div className="mt-1 text-[10px] text-right" style={{ color: 'var(--text-muted)' }}>

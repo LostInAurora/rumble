@@ -88,14 +88,14 @@ export function Dashboard() {
       </div>
 
       {/* Hero Stats */}
-      <div className="flex gap-4 animate-fade-in">
-        <div className={`flex-1 card-glass p-5 ${isUp ? 'glow-green' : 'glow-red'}`}>
+      <div className="flex flex-col sm:flex-row gap-4 animate-fade-in">
+        <div className={`flex-1 card-glass p-4 sm:p-5 ${isUp ? 'glow-green' : 'glow-red'}`}>
           <div className="label mb-2">Total Value</div>
           <div className="font-data text-3xl font-bold tracking-tight" style={{ color: 'var(--accent-green)' }}>
             {mask(`$${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
           </div>
         </div>
-        <div className="flex-1 card-glass p-5">
+        <div className="flex-1 card-glass p-4 sm:p-5">
           <div className="label mb-2">Total P&L</div>
           <div className="font-data text-3xl font-bold tracking-tight" style={{ color: isUp ? 'var(--accent-green)' : 'var(--accent-red)' }}>
             {mask(`${pnlSign}$${Math.abs(totalPnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}`)}
@@ -133,13 +133,13 @@ export function Dashboard() {
       {/* Allocation */}
       <div className="card-glass p-5 animate-fade-in" style={{ animationDelay: '0.15s' }}>
         <div className="label mb-3">Allocation</div>
-        <div className="flex items-center">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row items-center">
+          <div className="flex-1 w-full">
             <AllocationPieChart data={allocationData} />
           </div>
-          <div className="w-36 space-y-2">
+          <div className="w-full sm:w-36 flex flex-wrap gap-x-4 gap-y-1 sm:flex-col sm:gap-x-0 sm:gap-y-2 mt-3 sm:mt-0">
             {allocationData.map(d => (
-              <div key={d.name} className="flex items-center justify-between">
+              <div key={d.name} className="flex items-center gap-1 sm:justify-between">
                 <span className="text-xs font-medium" style={{ color: d.color }}>● {d.name}</span>
                 <span className="font-data text-xs" style={{ color: 'var(--text-secondary)' }}>
                   {totalValue > 0 ? ((d.value / totalValue) * 100).toFixed(0) : 0}%
